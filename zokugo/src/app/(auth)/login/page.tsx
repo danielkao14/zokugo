@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
+import { ensureProfileExists, getSessionUserId } from '@/lib/backend'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -19,8 +20,11 @@ export default function LoginPage() {
     try {
       if (isSignUp) {
         await signUp(email, password)
+        
       } else {
         await signIn(email, password)
+        const userId = await getSessionUserId()
+        await ensureProfileExists(userId, email)
       }
       router.push('/dashboard')
     } catch (err: any) {

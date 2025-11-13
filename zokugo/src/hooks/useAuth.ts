@@ -7,22 +7,45 @@ export function useAuth() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ? {
-        id: session.user.id,
-        email: session.user.email!,
-        name: session.user.user_metadata?.name
-      } : null)
-      setLoading(false)
-    })
+    // Get initial session
+    const getInitialSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        
+        if (session?.user) {
+          setUser({
+            id: session.user.id,
+            email: session.user.email!,
+            name: session.user.user_metadata?.name
+          })
+        }
+      } catch (error) {
+        console.error('Error loading session:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ? {
-        id: session.user.id,
-        email: session.user.email!,
-        name: session.user.user_metadata?.name
-      } : null)
-    })
+    getInitialSession()
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('Auth state changed:', event) // Debug log
+        
+        if (session?.user) {
+          setUser({
+            id: session.user.id,
+            email: session.user.email!,
+            name: session.user.user_metadata?.name
+          })
+        } else {
+          setUser(null)
+        }
+        
+        setLoading(false)
+      }
+    )
 
     return () => subscription.unsubscribe()
   }, [])
@@ -48,6 +71,7 @@ export function useAuth() {
   const signOut = async () => {
     const { error } = await supabase.auth.signOut()
     if (error) throw error
+    setUser(null)
   }
 
   return { user, loading, signIn, signUp, signOut }

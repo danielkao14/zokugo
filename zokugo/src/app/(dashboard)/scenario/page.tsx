@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useSpeechRecognition } from '@/hooks/useSpeechRecognition'
 import { useTextToSpeech } from '@/hooks/useTextToSpeech'
 import { supabase } from '@/lib/supabaseClient'
-import { generateResponse } from '@/lib/gemini'
+import { generateResponse, generateScenario } from '@/lib/gemini'
 import { scenarios } from '@/lib/scenarios'
 import { Message, Scenario } from '@/types'
 import { Send } from 'lucide-react'
@@ -32,14 +32,21 @@ export default function ScenarioPage() {
     }
   }, [transcript])
 
-  const startScenario = (scenario: Scenario) => {
+  const startScenario = async (scenario: Scenario) => {
+
     setSelectedScenario(scenario)
-    setMessages([
-      {
-        role: 'assistant',
-        content: `${scenario.emoji} Welcome! ${scenario.title} scenario started. Let's practice!`
-      }
+    try {
+      const scenarioPrompt = await generateScenario(scenario.title)
+      const aiMessage: Message = { role: 'assistant', content: scenarioPrompt }
+      setMessages([
+        aiMessage
     ])
+    } catch (error) {
+      console.error('Error generating response:', error)
+      alert('Failed to generate response. Please try again.')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const sendMessage = async () => {
@@ -92,7 +99,12 @@ export default function ScenarioPage() {
   // Scenario Selection View
   if (!selectedScenario) {
     return (
-      <div className="h-full overflow-y-auto">
+      <div className="h-full overflow-y-auto  bg-gradient-to-br from-purple-50 via-white to-pink-50">
+        <div className="text-center pt-8 pb-4">
+            <h1 className="text-4xl font-bold text-gray-800 mb-2">
+              Scenario Practice
+            </h1>
+        </div>
         <div className="p-6">
           <div className="mb-6">
             <h2 className="text-2xl font-bold text-gray-800 mb-2">Choose a Scenario</h2>
@@ -135,6 +147,7 @@ export default function ScenarioPage() {
           </div>
         </div>
       </div>
+      // </div>
     )
   }
 

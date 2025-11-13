@@ -10,6 +10,10 @@
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
   }
+  html {
+      overflow-y: scroll;
+      scrollbar-gutter: stable;
+  }
 }
 /* 
 @custom-variant dark (&:is(.dark *));

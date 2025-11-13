@@ -8,6 +8,7 @@ import { supabase } from '@/lib/supabaseClient'
 import { generateResponse } from '@/lib/gemini'
 import { Message } from '@/types'
 import { Send, MessageSquare } from 'lucide-react'
+import { systemPrompt } from '@/lib/utils'
 import MessageBubble from '@/components/MessageBubble'
 import VoiceRecorder from '@/components/VoiceRecorder'
 
@@ -40,7 +41,7 @@ export default function ConversationPage() {
     setIsLoading(true)
 
     try {
-      const response = await generateResponse(newMessages)
+      const response = await generateResponse(newMessages, systemPrompt)
       const aiMessage: Message = { role: 'assistant', content: response }
       setMessages([...newMessages, aiMessage])
     } catch (error) {
@@ -60,10 +61,12 @@ export default function ConversationPage() {
         .insert({
           user_id: user.id,
           messages,
-          type: 'free',
+          scenario: 'free',
         })
 
-      if (error) throw error
+      if (error) {
+        console.log('Error saving conversation:', error)
+        throw error}
       alert('Conversation saved!')
     } catch (error) {
       console.error('Error saving conversation:', error)
@@ -89,6 +92,7 @@ export default function ConversationPage() {
           <div className="text-center text-gray-500 mt-20">
             <MessageSquare size={48} className="mx-auto mb-4 text-gray-400" />
             <p>Start a conversation in Japanese!</p>
+            <p> Need help? Try asking for conversation starters 😀</p>;
             <p className="text-sm mt-2">Type or use voice input to practice</p>
           </div>
         )}

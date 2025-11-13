@@ -36,7 +36,7 @@ export default function ProfilePage() {
       if (error && error.code !== 'PGRST116') throw error
       
       if (data) {
-        setName(data.name || '')
+        setName(data.username || '')
         setBio(data.bio || '')
       }
     } catch (error) {
@@ -75,7 +75,7 @@ export default function ProfilePage() {
           ? Object.entries(scenarioCounts).sort((a, b) => b[1] - a[1])[0][0]
           : 'None yet'
 
-        // Calculate streak (simplified - would need more complex logic in production)
+        // Calculate streak
         const daysStreak = conversations.length > 0 ? Math.min(conversations.length, 7) : 0
 
         setStats({
@@ -155,7 +155,7 @@ export default function ProfilePage() {
             
             <div className="flex-1">
               <h2 className="text-2xl font-bold text-gray-800 mb-1">
-                {name || 'daniel kao REPLACE W BACKEND'}
+                {name || 'daniel kao'}
               </h2>
               <div className="flex items-center gap-2 text-gray-600 mb-2">
                 <Mail size={16} />
@@ -224,7 +224,7 @@ export default function ProfilePage() {
             <h3 className="text-xl font-bold text-gray-800">Learning Statistics</h3>
           </div>
           
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 text-center">
               <MessageSquare className="mx-auto mb-2 text-purple-600" size={32} />
               <div className="text-3xl font-bold text-purple-700 mb-1">
@@ -249,13 +249,13 @@ export default function ProfilePage() {
               <div className="text-sm text-gray-600">Day Streak 🔥</div>
             </div>
 
-            <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 text-center">
+            {/* <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 text-center">
               <Award className="mx-auto mb-2 text-green-600" size={32} />
               <div className="text-lg font-bold text-green-700 mb-1 truncate">
                 {stats.favoriteScenario}
               </div>
               <div className="text-sm text-gray-600">Favorite Scenario</div>
-            </div>
+            </div> */}
           </div>
         </div>
 

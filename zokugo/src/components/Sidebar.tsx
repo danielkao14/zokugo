@@ -1,10 +1,15 @@
 'use client'
 
-import { MessageCircle, BookOpen, BarChart3, User as UserIcon, LogOut } from 'lucide-react'
+import { MessageCircle, BookOpen, BarChart3, User as UserIcon, LogOut, Book, Disc3 } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 
-export default function Sidebar() {
+interface SidebarProps {
+  isDictionaryOpen: boolean
+  onToggleDictionary: () => void
+}
+
+export default function Sidebar({ isDictionaryOpen, onToggleDictionary }: SidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const { user, signOut } = useAuth()
@@ -15,8 +20,11 @@ export default function Sidebar() {
   }
 
   const navItems = [
+    { href: '/dashboard', icon: Book, label: 'Dashboard' },
     { href: '/conversation', icon: MessageCircle, label: 'Free Conversation' },
     { href: '/scenario', icon: BookOpen, label: 'Scenario Practice' },
+    { href: '/storyboard', icon: Disc3, label: 'Storyboard' },
+    {href: '/flashcards', icon: Book, label: 'Flashcards' },
     { href: '/review', icon: BarChart3, label: 'Review & Feedback' },
     { href: '/profile', icon: UserIcon, label: 'Profile' },
   ]
@@ -47,6 +55,21 @@ export default function Sidebar() {
             </button>
           )
         })}
+        
+        {/* Dictionary Toggle */}
+        <div className="pt-2 border-t border-gray-200 mt-2">
+          <button
+            onClick={onToggleDictionary}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition ${
+              isDictionaryOpen
+                ? 'bg-purple-100 text-purple-700'
+                : 'text-gray-700 hover:bg-gray-100'
+            }`}
+          >
+            <Book size={20} />
+            <span className="font-medium">Dictionary</span>
+          </button>
+        </div>
       </nav>
       
       <div className="p-4 border-t border-gray-200">
