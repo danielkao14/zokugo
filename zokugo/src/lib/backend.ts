@@ -206,7 +206,7 @@ export async function getConversations(
       .order('created_at', { ascending: false })
 
     if (type) {
-      query = query.eq('type', type)
+      query = query.eq('scenario', type)
     }
 
     if (limit) {
@@ -627,12 +627,14 @@ export async function deleteCard(userId: string, cardId: string) {
  * @param level - JLPT level (N1-N5)
  * @param title - Story title
  * @param content - Story content in Japanese
+ * @param vocabulary - Array of vocabulary items
  */
 export async function createStory(
   userId: string,
   level: string,
   title: string,
-  content: string
+  content: string,
+  vocabulary: Array<{ word: string; reading: string; definition: string }>
 ) {
   try {
     const { data, error } = await supabase
@@ -642,6 +644,7 @@ export async function createStory(
         level,
         title,
         content,
+        vocabulary,
         created_at: new Date().toISOString()
       })
       .select()

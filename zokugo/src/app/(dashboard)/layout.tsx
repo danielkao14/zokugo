@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import { useResizable } from '@/hooks/useResizable'
 import Sidebar from '@/components/Sidebar'
@@ -15,7 +15,13 @@ export default function DashboardLayout({
 }) {
   const { user, loading } = useAuth()
   const router = useRouter()
-  const [isDictionaryOpen, setIsDictionaryOpen] = useState(false)
+  const pathname = usePathname()
+const [isDictionaryOpen, setIsDictionaryOpen] = useState(false);
+
+useEffect(() => {
+  const dictionaryPages = ['/conversation', '/scenario', '/storyboard']
+  setIsDictionaryOpen(dictionaryPages.includes(pathname))
+}, [pathname])
   
   const { width: dictionaryWidth, isResizing, startResizing } = useResizable({
     minWidth: 300,
