@@ -206,7 +206,7 @@ export async function getConversations(
       .order('created_at', { ascending: false })
 
     if (type) {
-      query = query.eq('scenario', type)
+      query = query.eq('type', type)
     }
 
     if (limit) {
@@ -725,6 +725,80 @@ export async function deleteStory(userId: string, storyId: string) {
   } catch (error) {
     console.error('Error deleting story:', error)
     return { error }
+  }
+}
+
+/**
+ * Conversation Review & Feedback
+ */
+
+/**
+ * Generate AI-powered conversation review
+ * @param messages - Array of conversation messages
+ */
+export async function generateConversationReview(messages: Message[]) {
+  try {
+    const { GoogleGenerativeAI } = await import('@google/generative-ai')
+    const API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY || ''
+    const genAI = new GoogleGenerativeAI(API_KEY)
+
+    const systemInstruction = `You are an expert Japanese language teacher providing detailed feedback on student conversations. 
+
+Analyze the conversation and provide a comprehensive review in the following JSON format:
+{
+  "overallScore": 85,
+  "strengths": ["Good use of polite forms", "Natural conversation flow"],
+  "areasForImprovement": ["Particle usage needs work", "Limited vocabulary range"],
+  "grammarPoints": [
+    {
+      "mistake": "私は学校に行きましたか？",
+      "correction": "私は学校に行きました。",
+      "explanation": "You used the question form か with a statement. Remove か when making statements.",
+      "example": "彼は昨日来ました。(He came yesterday.)"
+    }
+  ],
+  "vocabularyRecommendations": ["Learn more time expressions", "Study weather vocabulary"],
+  "styleNotes": ["Try using more casual expressions with friends", "Good job matching formality levels"],
+  "nextSteps": ["Practice particle は vs が", "Study JLPT N4 grammar patterns", "Read more native content"]
+}
+
+Focus on:
+1. Grammar mistakes with specific examples from their conversation
+2. Vocabulary gaps and recommendations
+3. Conversational style improvements to sound more natural
+4. Concrete next steps for improvement
+
+Be encouraging but honest. Provide 3-5 items in each category. Make corrections specific to their actual mistakes.`
+
+    const model = genAI.getGenerativeModel({ 
+      model: 'gemini-2.5-flash-lite',
+      systemInstruction 
+    })
+
+    // Format conversation for analysis
+    const conversationText = messages
+      .map(m => `${m.role === 'user' ? 'Student' : 'Assistant'}: ${m.content}`)
+      .join('\n\n')
+
+    const prompt = `Analyze this Japanese conversation and provide detailed feedback:\n\n${conversationText}\n\nProvide your response in JSON format as specified.`
+
+    const response = await model.generateContent(prompt)
+    const text = response.response.text()
+
+    // Extract JSON from response (handle markdown code blocks)
+    let jsonText = text
+    if (text.includes('```json')) {
+      jsonText = text.split('```json')[1].split('```')[0].trim()
+    } else if (text.includes('```')) {
+      jsonText = text.split('```')[1].split('```')[0].trim()
+    }
+
+    const review = JSON.parse(jsonText)
+
+    return { data: review, error: null }
+  } catch (error) {
+    console.error('Error generating review:', error)
+    return { data: null, error }
   }
 }
 
